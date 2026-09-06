@@ -374,7 +374,18 @@ function kFmt(v) {
 function buildLegend(id, items) {
   const el = $(id);
   if (!el) return;
-  el.innerHTML = items.map(i => `<span class="item"><span class="dot" style="background:${i.color}"></span>${i.label}</span>`).join("");
+  el.innerHTML = items.map(i => {
+    let html = `<span class="item"><span class="dot" style="background:${i.color}"></span><span class="label">${i.label}</span>`;
+    if (i.pct !== undefined && i.pct !== null) html += ` <span class="pct">${i.pct}%</span>`;
+    if (i.delta !== undefined && i.delta !== null) {
+      const v = Number(i.delta) || 0;
+      const cls = v >= 0 ? "up" : "down";
+      const sign = v >= 0 ? "+" : "";
+      html += ` <span class="delta ${cls}">${sign}${i.delta}%</span>`;
+    }
+    html += "</span>";
+    return html;
+  }).join("");
 }
 
 function renderCharts() {
@@ -385,7 +396,7 @@ function renderCharts() {
     Chart.defaults.font.family = "-apple-system,PingFang SC,Microsoft YaHei,sans-serif";
     const pal = { salary: "#4e79a7", total: "#e15759", balance: "#59a14f",
                   charge: "#4e79a7", water: "#76b7b2", elec: "#f28e2b", gas: "#b07aa1" };
-    const TREND = "#f4c542";   // 结余趋势线颜色（与收入/支出/结余柱均不同），右轴刻度同步
+    const TREND = "#7ed085";   // 结余趋势线颜色（接近结余绿的浅绿），右轴刻度同步
 
     // ===== 近6个月现金流对比（柱状+结余趋势线） =====
     const last6 = ROWS.slice(-6);
@@ -457,13 +468,30 @@ function buildPieSelect() {
 }
 
 function renderPie(month) {
-  const r = ROWS.find(x => x.month === month) || ROWS[ROWS.length - 1];
+  const idx = ROWS.findIndex(x => x.month === month);
+  const r = idx >= 0 ? ROWS[idx] : ROWS[ROWS.length - 1];
+  const prev = idx > 0 ? ROWS[idx - 1] : null;
+  const total = Object.values(r.cat).reduce((a, b) => a + b, 0);
+  const prevTotal = prev ? Object.values(prev.cat).reduce((a, b) => a + b, 0) : 0;
+
   if (charts.pie) charts.pie.destroy();
   charts.pie = new Chart($("#pie"), { type: "doughnut",
     data: { labels: CAT_NAMES, datasets: [{ data: CAT_NAMES.map(n => r.cat[n]), backgroundColor: CAT_NAMES.map(n => CAT_COLORS[n]), borderWidth: 0 }] },
     options: { responsive: true, maintainAspectRatio: false, cutout: "58%",
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${ctx.label}: ${fmt(ctx.raw)}` } } } } });
-  buildLegend("#pie-legend", CAT_NAMES.map(n => ({ label: n, color: CAT_COLORS[n] })));
+
+  const items = CAT_NAMES.map(n => {
+    const v = r.cat[n] || 0;
+    const pct = total ? (v / total * 100) : 0;
+    let delta = null;
+    if (prev) {
+      const pv = prev.cat[n] || 0;
+      const ppct = prevTotal ? (pv / prevTotal * 100) : 0;
+      delta = pct - ppct;
+    }
+    return { label: n, color: CAT_COLORS[n], pct: pct.toFixed(1), delta: delta !== null ? delta.toFixed(1) : null };
+  });
+  buildLegend("#pie-legend", items);
 }
 
 /* ===================================================================
