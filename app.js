@@ -385,6 +385,7 @@ function renderCharts() {
     Chart.defaults.font.family = "-apple-system,PingFang SC,Microsoft YaHei,sans-serif";
     const pal = { salary: "#4e79a7", total: "#e15759", balance: "#59a14f",
                   charge: "#4e79a7", water: "#76b7b2", elec: "#f28e2b", gas: "#b07aa1" };
+    const TREND = "#f4c542";   // 结余趋势线颜色（与收入/支出/结余柱均不同），右轴刻度同步
 
     // ===== 近6个月现金流对比（柱状+结余趋势线） =====
     const last6 = ROWS.slice(-6);
@@ -396,7 +397,7 @@ function renderCharts() {
         { label: "收入", data: last6.map(r => r.salary), backgroundColor: pal.salary, yAxisID: "y", order: 2, barPercentage: 0.6 },
         { label: "支出", data: last6.map(r => r.total), backgroundColor: pal.total, yAxisID: "y", order: 3, barPercentage: 0.6 },
         { label: "结余", data: last6.map(r => r.balance), backgroundColor: pal.balance, yAxisID: "y", order: 4, barPercentage: 0.6 },
-        { label: "结余趋势", data: last6.map(r => r.balance), borderColor: "#7ed085", backgroundColor: "#7ed085",
+        { label: "结余趋势", data: last6.map(r => r.balance), borderColor: TREND, backgroundColor: TREND,
           type: "line", yAxisID: "y1", tension: .35, fill: false, pointRadius: 3, pointHoverRadius: 5, borderWidth: 2.5, order: 1 },
       ] },
       options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false },
@@ -408,7 +409,7 @@ function renderCharts() {
           y: { position: "left", grid: { color: "#2b3748" }, border: { display: false },
             ticks: { callback: v => kFmt(v) } },
           y1: { position: "right", grid: { display: false }, border: { display: false },
-            ticks: { callback: v => kFmt(v) } }
+            ticks: { color: TREND, callback: v => kFmt(v) } }
         } } });
     buildLegend("#trend-legend", [
       { label: "收入", color: pal.salary },
