@@ -82,6 +82,7 @@ loadDefaults();
 
 /* ---------------- 状态 ---------------- */
 let ROWS = [];
+let forceLatest = false;   // 新增月份数据后，让筛选下拉自动跳到最新月份
 let charts = {};
 let currentUser = null;
 
@@ -204,6 +205,7 @@ function renderAll() {
   $("#empty").hidden = true;
   $("#dashboard").hidden = false;
   renderTopCards(); renderRepay(); renderChecklist(); renderSummary(); renderDetail(); renderCharts();
+  forceLatest = false;   // 单次刷新只强制跳一次
 }
 
 /* ---------- 储蓄目标 ---------- */
@@ -294,8 +296,9 @@ function renderRepay() {
 function renderChecklist() {
   const sel = $("#checklist-month");
   const cur = sel.value;
+  const latest = ROWS[ROWS.length - 1].month;
   sel.innerHTML = ROWS.map(r => `<option value="${r.month}">${r.month}</option>`).join("");
-  sel.value = (cur && ROWS.some(r => r.month === cur)) ? cur : ROWS[ROWS.length - 1].month;
+  sel.value = forceLatest ? latest : ((cur && ROWS.some(r => r.month === cur)) ? cur : latest);
   sel.onchange = () => renderChecklistMonth(sel.value);
   renderChecklistMonth(sel.value);
 }
@@ -431,8 +434,9 @@ function renderCharts() {
 function buildPieSelect() {
   const sel = $("#pie-month");
   const cur = sel.value;
+  const latest = ROWS[ROWS.length - 1].month;
   sel.innerHTML = ROWS.map(r => `<option value="${r.month}">${r.month}</option>`).join("");
-  sel.value = (cur && ROWS.some(r => r.month === cur)) ? cur : ROWS[ROWS.length - 1].month;
+  sel.value = forceLatest ? latest : ((cur && ROWS.some(r => r.month === cur)) ? cur : latest);
   sel.onchange = () => renderPie(sel.value);
 }
 
@@ -518,7 +522,9 @@ $("#add-form").onsubmit = async (e) => {
   } else {
     saveLocal();
   }
-  e.target.reset(); $("#modal-add").hidden = true; renderAll();
+  e.target.reset(); $("#modal-add").hidden = true;
+  forceLatest = true;          // 新增月份后，筛选自动跳到最新月份
+  renderAll();
 };
 
 /* ===================================================================
@@ -549,7 +555,9 @@ $("#csv-go").onclick = async () => {
     saveLocal();
   }
   msg.textContent = `成功导入 ${incoming.length} 行`; msg.className = "msg ok";
-  $("#modal-import").hidden = true; renderAll();
+  $("#modal-import").hidden = true;
+  forceLatest = true;          // 新增月份后，筛选自动跳到最新月份
+  renderAll();
 };
 
 /* ---------------- 启动 ---------------- */
