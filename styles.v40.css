@@ -90,16 +90,17 @@ h2.sec select{background:var(--panel2);color:var(--txt);border:1px solid var(--l
   h1{font-size:20px}
   .cards{grid-template-columns:1fr 1fr;gap:10px}
   .card-big{padding:14px}
-  .metrics{grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:8px}
+  .metrics{grid-template-columns:1fr;gap:10px}
   .metric-value{font-size:20px}
   .card-foot{flex-direction:column;gap:6px;font-size:11px}
   .goal-row button{font-size:10px;padding:3px 6px}
-  .dock{left:50%;right:auto;transform:translateX(-50%);width:auto;max-width:calc(100vw - 24px);padding:6px 10px;gap:6px;border-radius:999px;justify-content:center;box-sizing:border-box}
-  .dock-title{display:none}
+  .dock{left:50%;right:auto;transform:translateX(-50%);width:auto;max-width:calc(100vw - 24px);padding:5px 8px;gap:5px;border-radius:999px;justify-content:center;box-sizing:border-box}
+  .dock-title{display:none !important}
   .dock .user{font-size:11px;max-width:100px}
-  .dock .primary{padding:8px 14px;font-size:12px;border-radius:999px}
-  .dock .ghost{padding:6px 10px;font-size:11px;border-radius:999px}
-  .user-icon{width:32px;height:32px}
+  .dock .primary{padding:7px 12px;font-size:11px;border-radius:999px}
+  .dock .ghost{padding:5px 9px;font-size:10.5px;border-radius:999px}
+  .user-icon{width:28px;height:28px;padding:0}
+  .user-icon svg{width:14px;height:14px}
   .user-dropdown{width:180px;right:-6px}
   .panel{padding:12px}
   .panel h2{font-size:14px}
