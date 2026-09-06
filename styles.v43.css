@@ -107,7 +107,7 @@ h2.sec select{background:var(--panel2);color:var(--txt);border:1px solid var(--l
   .chart-box{height:240px}
   .pie-content{grid-template-columns:1fr;height:auto;gap:10px}
   .pie-content .chart-box.pie-box{height:140px}
-  .chart-legend.pie-legend{justify-content:flex-start;gap:6px 10px;flex-wrap:wrap}
+  .chart-legend.pie-legend{justify-content:flex-start !important;gap:6px 10px;flex-wrap:wrap;width:max-content !important;max-width:100% !important;margin:0 auto !important}
   .pie-legend .item{flex:0 0 100% !important;min-width:0;justify-content:flex-start;font-size:11px;white-space:nowrap;overflow:visible}
   .pie-legend .dot{flex-shrink:0;width:9px;height:9px}
   .pie-legend .label{overflow:visible;text-overflow:clip;white-space:nowrap;min-width:0}
