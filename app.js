@@ -371,7 +371,7 @@ function kFmt(v) {
   return "¥" + Math.round(n);
 }
 
-function buildLegend(id, items) {
+function buildLegend(id, items, deltaPrefix) {
   const el = $(id);
   if (!el) return;
   el.innerHTML = items.map(i => {
@@ -381,7 +381,8 @@ function buildLegend(id, items) {
       const v = Number(i.delta) || 0;
       const cls = v >= 0 ? "up" : "down";
       const sign = v >= 0 ? "+" : "";
-      html += ` <span class="delta ${cls}">${sign}${i.delta}%</span>`;
+      const prefix = deltaPrefix ? deltaPrefix + " " : "";
+      html += ` <span class="delta ${cls}">${prefix}${sign}${i.delta}%</span>`;
     }
     html += "</span>";
     return html;
@@ -491,7 +492,7 @@ function renderPie(month) {
     }
     return { label: n, color: CAT_COLORS[n], pct: pct.toFixed(1), delta: delta !== null ? delta.toFixed(1) : null };
   });
-  buildLegend("#pie-legend", items);
+  buildLegend("#pie-legend", items, "较上月");
 }
 
 /* ===================================================================
