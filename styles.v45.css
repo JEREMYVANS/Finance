@@ -243,8 +243,9 @@ button{font-family:inherit}
 
 /* 手机/平板横屏下支出构成单列居中：甜甜圈局中、图例块局中、文字靠左 */
 @media(max-width:1024px){
-  .pie-content{grid-template-columns:1fr !important;height:auto !important;gap:12px !important;justify-items:center !important}
-  .pie-content .chart-box.pie-box{height:150px !important;width:100% !important}
+  .pie-content{display:flex !important;flex-direction:column !important;align-items:center !important;height:auto !important;gap:12px !important}
+  .pie-content .chart-box.pie-box{height:150px !important;width:100% !important;max-width:280px !important;margin:0 auto !important;overflow:hidden !important}
+  .pie-content .chart-box.pie-box canvas{max-width:100% !important;height:auto !important}
   .chart-legend.pie-legend{justify-content:flex-start !important;gap:8px 10px !important;flex-wrap:wrap !important;width:max-content !important;max-width:100% !important;margin:0 auto !important}
   .pie-legend .item{flex:0 0 100% !important;min-width:0 !important;justify-content:flex-start !important;font-size:12px !important;white-space:nowrap !important;overflow:visible !important}
   .pie-legend .dot{flex-shrink:0 !important;width:9px !important;height:9px !important}
