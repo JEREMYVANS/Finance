@@ -9,6 +9,7 @@ const SUPABASE_ANON_KEY = "sb_publishable_OyaS63n4jvVCuoqaBxPozA_0U6CWNYL";
 const USE_CLOUD = !SUPABASE_URL.includes("YOUR_");
 
 const LOCAL_KEY = "finance_rows_v1";
+const SAVINGS_TABLE = "finance_savings";   // 应急储蓄云端表（需执行 supabase_savings.sql 建表）
 
 /* 内置种子数据（2025-10 ~ 2026-07） */
 const SEED = [
@@ -121,7 +122,7 @@ function loadFromLocal() {
   if (!Array.isArray(data) || !data.length) { data = []; }
   ROWS = data.map(derive);
   recomputeTerms();   // 加载时自愈期数，纠正历史偏移
-  initCurrentSavings(ROWS);
+  initSavingsLocal(ROWS);
   renderAll();
 }
 function saveLocal() {
@@ -140,7 +141,8 @@ async function loadFromCloud() {
     if (upErr) console.warn("首次上传本地数据失败", upErr);
     else console.log("已将本地", ROWS.length, "条数据同步到云端");
   }
-  initCurrentSavings(ROWS);
+  initSavingsLocal(ROWS);
+  await loadSavingsFromCloud();   // 同步应急储蓄（当前金额 + 目标）到多端一致
   renderAll();
 }
 
@@ -242,25 +244,52 @@ function renderAll() {
   forceLatest = false;   // 单次刷新只强制跳一次
 }
 
-/* ---------- 储蓄目标 ---------- */
+/* ---------- 储蓄目标 / 应急储蓄当前金额：本地优先 + 可选云端同步 ---------- */
 const GOAL_KEY = "savings_goal_v1";
-let SAVINGS_GOAL = 50000;
-function loadGoal() {
-  try { const v = Number(localStorage.getItem(GOAL_KEY)); if (v > 0) SAVINGS_GOAL = v; } catch {}
-}
-function saveGoal(v) { SAVINGS_GOAL = Math.max(1, Number(v) || 50000); localStorage.setItem(GOAL_KEY, SAVINGS_GOAL); }
-loadGoal();
-
-/* ---------- 应急储蓄当前金额（可手动调整，初始为累计基金储蓄） ---------- */
 const SAVE_CUR_KEY = "savings_current_v1";
+let SAVINGS_GOAL = 50000;
 let SAVINGS_CURRENT = 0;
-function initCurrentSavings(rows) {
+
+/* 本地初始化：优先用本地持久值，否则按累计基金储蓄推导 */
+function initSavingsLocal(rows) {
   const persisted = Number(localStorage.getItem(SAVE_CUR_KEY));
-  if (!Number.isNaN(persisted) && persisted > 0) { SAVINGS_CURRENT = persisted; return; }
-  SAVINGS_CURRENT = rows.reduce((s, r) => s + (Number(r.saving_fund) || 0), 0);
-  localStorage.setItem(SAVE_CUR_KEY, SAVINGS_CURRENT);
+  SAVINGS_CURRENT = (!Number.isNaN(persisted) && persisted > 0)
+    ? persisted
+    : rows.reduce((s, r) => s + (Number(r.saving_fund) || 0), 0);
+  const gp = Number(localStorage.getItem(GOAL_KEY));
+  if (gp > 0) SAVINGS_GOAL = gp;
 }
-function saveCurrent(v) { SAVINGS_CURRENT = Math.max(0, Number(v) || 0); localStorage.setItem(SAVE_CUR_KEY, SAVINGS_CURRENT); }
+
+/* 从云端读取应急储蓄（当前金额 + 目标）；云端无记录则上传本地值；全程容错降级 */
+async function loadSavingsFromCloud() {
+  if (!(USE_CLOUD && currentUser && sb)) return;
+  try {
+    const { data, error } = await sb.from(SAVINGS_TABLE).select("current,goal").eq("user_id", currentUser.id).maybeSingle();
+    if (error && error.code !== "PGRST116") console.warn("读取应急储蓄失败：", error.message);
+    if (data) {
+      if (data.current != null) SAVINGS_CURRENT = Number(data.current);
+      if (data.goal != null) SAVINGS_GOAL = Number(data.goal);
+    } else {
+      await saveSavingsToCloud();   // 首次把本地值推上云
+    }
+  } catch (e) { console.warn("应急储蓄云端同步异常，沿用本地值", e); }
+  if (typeof renderTopCards === "function") renderTopCards();
+}
+
+/* 上传应急储蓄到云端（容错：表不存在或无登录时静默跳过） */
+async function saveSavingsToCloud() {
+  if (!(USE_CLOUD && currentUser && sb)) return;
+  try {
+    const { error } = await sb.from(SAVINGS_TABLE).upsert(
+      { user_id: currentUser.id, current: SAVINGS_CURRENT, goal: SAVINGS_GOAL },
+      { onConflict: "user_id" });
+    if (error) console.warn("保存应急储蓄失败：", error.message);
+  } catch (e) { console.warn("应急储蓄上传异常", e); }
+}
+
+function saveGoal(v) { SAVINGS_GOAL = Math.max(1, Number(v) || 50000); localStorage.setItem(GOAL_KEY, SAVINGS_GOAL); saveSavingsToCloud(); }
+function saveCurrent(v) { SAVINGS_CURRENT = Math.max(0, Number(v) || 0); localStorage.setItem(SAVE_CUR_KEY, SAVINGS_CURRENT); saveSavingsToCloud(); }
+initSavingsLocal(ROWS);   // 启动时先用本地/派生值占位（登录后会用云端覆盖）
 
 function pctDelta(curr, prev) {
   if (!prev) return 0;
@@ -575,6 +604,7 @@ $("#add-form").onsubmit = async (e) => {
   // 应急储蓄金额随基金储蓄变动自动修正
   SAVINGS_CURRENT += (Number(row.saving_fund) || 0) - oldFund;
   localStorage.setItem(SAVE_CUR_KEY, SAVINGS_CURRENT);
+  saveSavingsToCloud();   // 应急储蓄随基金储蓄变动，同步到云端
   if (USE_CLOUD && currentUser) {
     const { error } = await sb.from("finance_records").upsert(
       { user_id: currentUser.id, ...strip(row) }, { onConflict: "user_id,month" });
