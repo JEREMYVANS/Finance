@@ -5,21 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>财务仪表盘</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1" />
-  <link rel="stylesheet" href="styles.css?v=29" />
+  <link rel="stylesheet" href="styles.css?v=31" />
   <script src="chart.umd.min.js"></script>
 </head>
 <body>
   <!-- ===================== 登录 / 注册 ===================== -->
   <div id="auth-view" class="auth-wrap" hidden>
     <div class="auth-card">
-      <h1>云端同步</h1>
-      <p class="muted">登录后数据上云、多端可用（也可仅用本地模式）。</p>
+      <h1>财务仪表盘</h1>
       <div class="tabs">
         <button class="tab active" data-mode="signin">登录</button>
         <button class="tab" data-mode="signup">注册</button>
       </div>
       <input id="email" type="email" placeholder="邮箱" autocomplete="email" />
-      <input id="password" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password" />
+      <input id="password" type="password" placeholder="密码" autocomplete="current-password" />
       <button id="auth-btn" class="primary">登录</button>
       <button id="auth-cancel" class="ghost" style="width:100%;margin-top:10px;">返回本地模式</button>
       <div id="auth-msg" class="msg"></div>
@@ -159,7 +158,7 @@
       <!-- 页脚版权 -->
       <footer class="site-footer">
         <div>Copyright © 2026 Edward Chong</div>
-        <div class="ver">V1.06</div>
+        <div class="ver">V1.08</div>
       </footer>
     </main>
   </div>
@@ -236,6 +235,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=29"></script>
+  <script src="app.js?v=31"></script>
 </body>
 </html>
