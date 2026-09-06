@@ -102,10 +102,11 @@ h2.sec select{background:var(--panel2);color:var(--txt);border:1px solid var(--l
   .panel{padding:12px}
   .panel h2{font-size:14px}
   .chart-box{height:240px}
-  .pie-content{height:150px}
-  .pie-content .chart-box.pie-box{height:150px}
+  .pie-content{grid-template-columns:1fr;height:auto;gap:10px}
+  .pie-content .chart-box.pie-box{height:140px}
+  .chart-legend.pie-legend{justify-content:flex-start;gap:8px 12px}
+  .pie-legend .item{flex:0 0 calc(50% - 6px);justify-content:flex-start;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   h2.sec{font-size:14px}
-  .pie-legend .item{font-size:10.5px}
   th,td{padding:6px 8px;font-size:12px}
   .table-wrap{max-height:320px}
   .form-grid{grid-template-columns:1fr}
