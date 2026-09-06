@@ -9,7 +9,7 @@
 | `styles.css` | 主题样式（配色抽成 `:root` 变量，改深色/玻璃风只动这一处） |
 | `app.js` | 前端逻辑（Supabase 客户端、认证、图表、CSV 导入、默认值调整） |
 | `supabase-schema.sql` | 建表 + 行级安全（RLS）语句 |
-| `seed.csv` | 你现有的 10 个月数据（首次迁移用） |
+| `seed.csv` | ⚠️ **本地迁移用，含真实财务数据，已被 `.gitignore` 排除，切勿上传到公开仓库** |
 | `chart.umd.min.js` | 本地化的 Chart.js（无 CDN 依赖） |
 | `supabase.min.js` | 本地化的 Supabase 客户端（本地模式零网络依赖） |
 
@@ -24,7 +24,7 @@
 
 ## 二、首次导入历史数据
 1. 用 GitHub Pages 地址打开网站（见下文部署），点底部「**云端同步**」→「注册」用邮箱+密码建账号。
-2. 登录后点底部「**导入**」→ 选择本仓库里的 `seed.csv` → 导入。
+2. 登录后点底部「**导入**」→ 选择你**本地**的 `seed.csv`（从本机文件选择，**不要从仓库下载**，该文件已被 `.gitignore` 排除、不会出现在线上）→ 导入。
    - 这会把你现有的 10 个月数据写入你的账号。（之后新增月份用「+ 记录」即可。）
 
 ## 三、部署到 GitHub Pages
@@ -48,8 +48,9 @@
 如果你不想用命令行：
 
 1. GitHub 新建公开仓库 → 进入仓库页面。
-2. 把本目录的 8 个文件拖进网页上传区（或点 `+` → `Upload files`）：
-   `index.html`、`styles.css`、`app.js`、`chart.umd.min.js`、`supabase.min.js`、`seed.csv`、`supabase-schema.sql`、`README.md`
+2. 把本目录的 7 个文件拖进网页上传区（或点 `+` → `Upload files`）：
+   `index.html`、`styles.css`、`app.js`、`chart.umd.min.js`、`supabase.min.js`、`supabase-schema.sql`、`README.md`
+   - ⚠️ **不要上传 `seed.csv`**（含真实财务数据，已通过 `.gitignore` 排除）。
 3. **Settings → Pages** → Source 选 `main` / `(root)` → Save。
 4. 等 1-2 分钟即可访问。
 
