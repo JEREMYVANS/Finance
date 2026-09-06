@@ -105,13 +105,6 @@ h2.sec select{background:var(--panel2);color:var(--txt);border:1px solid var(--l
   .panel{padding:12px}
   .panel h2{font-size:14px}
   .chart-box{height:240px}
-  .pie-content{grid-template-columns:1fr;height:auto;gap:10px}
-  .pie-content .chart-box.pie-box{height:140px}
-  .chart-legend.pie-legend{justify-content:flex-start !important;gap:6px 10px;flex-wrap:wrap;width:max-content !important;max-width:100% !important;margin:0 auto !important}
-  .pie-legend .item{flex:0 0 100% !important;min-width:0;justify-content:flex-start;font-size:11px;white-space:nowrap;overflow:visible}
-  .pie-legend .dot{flex-shrink:0;width:9px;height:9px}
-  .pie-legend .label{overflow:visible;text-overflow:clip;white-space:nowrap;min-width:0}
-  .pie-legend .pct{flex-shrink:0;white-space:nowrap}
   h2.sec{font-size:14px}
   th,td{padding:6px 8px;font-size:12px}
   .table-wrap{max-height:320px}
@@ -247,3 +240,14 @@ button{font-family:inherit}
 .site-footer{text-align:center;color:var(--muted);opacity:.6;font-size:12px;line-height:1.7;
   padding:28px 0 92px;margin-top:20px}
 .site-footer .ver{font-size:11px;opacity:.85}
+
+/* 手机/平板横屏下支出构成单列居中：甜甜圈局中、图例块局中、文字靠左 */
+@media(max-width:1024px){
+  .pie-content{grid-template-columns:1fr !important;height:auto !important;gap:12px !important;justify-items:center !important}
+  .pie-content .chart-box.pie-box{height:150px !important;width:100% !important}
+  .chart-legend.pie-legend{justify-content:flex-start !important;gap:8px 10px !important;flex-wrap:wrap !important;width:max-content !important;max-width:100% !important;margin:0 auto !important}
+  .pie-legend .item{flex:0 0 100% !important;min-width:0 !important;justify-content:flex-start !important;font-size:12px !important;white-space:nowrap !important;overflow:visible !important}
+  .pie-legend .dot{flex-shrink:0 !important;width:9px !important;height:9px !important}
+  .pie-legend .label{overflow:visible !important;text-overflow:clip !important;white-space:nowrap !important;min-width:0 !important}
+  .pie-legend .pct{flex-shrink:0 !important;white-space:nowrap !important}
+}
