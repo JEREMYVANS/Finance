@@ -26,10 +26,14 @@
 /* 让 hidden 属性真正生效，避免弹窗/视图被 display 覆盖 */
 [hidden]{display:none !important}
 html{min-height:100%}
+/* 手机端防护：禁止横向溢出（否则 1fr 网格项宽度会因溢出而被算成不一致） */
+html,body{max-width:100%;overflow-x:hidden}
+.cards>.card-big,.grid>.panel,.grid>.card-big{min-width:0}
 
 body{
   font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
   background:var(--bg);color:var(--txt);padding:24px;line-height:1.5;
+  padding-top:max(24px, env(safe-area-inset-top));
   padding-bottom:96px;
   -webkit-font-smoothing:antialiased;
 }
@@ -81,6 +85,31 @@ h2.sec select{background:var(--panel2);color:var(--txt);border:1px solid var(--l
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;margin-top:28px;align-items:stretch}
 .grid.single{grid-template-columns:1fr}
 @media(max-width:860px){.grid{grid-template-columns:1fr}}
+@media(max-width:640px){
+  body{padding:14px;padding-top:max(14px, env(safe-area-inset-top));padding-bottom:88px}
+  h1{font-size:20px}
+  .cards{gap:12px}
+  .card-big{padding:14px}
+  .metrics{grid-template-columns:1fr;gap:10px}
+  .metric-value{font-size:20px}
+  .card-foot{flex-direction:column;gap:6px;font-size:11px}
+  .goal-row button{font-size:10px;padding:3px 6px}
+  .dock{left:12px;right:12px;transform:none;width:auto;padding:8px 10px;gap:6px;border-radius:20px}
+  .dock-title{display:none}
+  .dock .primary{padding:9px 14px;font-size:13px;border-radius:16px}
+  .dock .ghost{padding:7px 10px;font-size:12px;border-radius:14px}
+  .dock .user{display:none}
+  .panel{padding:12px}
+  .panel h2{font-size:14px}
+  .chart-box{height:240px}
+  .pie-content{height:150px}
+  .pie-content .chart-box.pie-box{height:150px}
+  h2.sec{font-size:14px}
+  .pie-legend .item{font-size:10.5px}
+  th,td{padding:6px 8px;font-size:12px}
+  .table-wrap{max-height:320px}
+  .form-grid{grid-template-columns:1fr}
+}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
 .panel h2{font-size:15px;margin-bottom:12px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .panel h2 select{margin-left:auto;background:var(--panel2);color:var(--txt);border:1px solid var(--line);

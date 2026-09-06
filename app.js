@@ -117,7 +117,8 @@ function strip(r) {  // 去掉派生字段，只保留原始列
 function loadFromLocal() {
   let data = null;
   try { data = JSON.parse(localStorage.getItem(LOCAL_KEY)); } catch {}
-  if (!Array.isArray(data) || !data.length) { data = SEED.slice(); localStorage.setItem(LOCAL_KEY, JSON.stringify(data)); }
+  // 默认不再展示内置 SEED；登录后才从云端拉取个人数据
+  if (!Array.isArray(data) || !data.length) { data = []; }
   ROWS = data.map(derive);
   recomputeTerms();   // 加载时自愈期数，纠正历史偏移
   initCurrentSavings(ROWS);
@@ -183,11 +184,26 @@ $("#auth-btn").onclick = async () => {
   }
 };
 
+/* 进入仪表盘：已登录时加载云端；本地 fallback 时保持空状态（不再默认展示 SEED） */
 function enterApp() {
   authView.hidden = true; appView.hidden = false;
   $("#dock").hidden = false;
   if (USE_CLOUD && currentUser) { $("#user-email").textContent = currentUser.email; loadFromCloud(); }
   else loadFromLocal();
+}
+
+/* 强制进入登录页，清空仪表盘数据 */
+function showLogin() {
+  currentUser = null;
+  ROWS = [];
+  Object.values(charts).forEach(c => { if (c) try { c.destroy(); } catch {} });
+  charts = {};
+  $("#user-email").textContent = "";
+  $("#logout-btn").hidden = true;
+  $("#sync-btn").hidden = false;
+  authView.hidden = false;
+  appView.hidden = true;
+  $("#dock").hidden = true;
 }
 
 /* ===================================================================
@@ -201,13 +217,8 @@ $("#sync-btn").onclick = () => {
   $("#auth-msg").textContent = ""; $("#auth-msg").className = "msg";
 };
 $("#logout-btn").onclick = () => {
-  sb.auth.signOut();
-  currentUser = null;
-  $("#user-email").textContent = "";
-  $("#logout-btn").hidden = true;
-  $("#sync-btn").hidden = false;
-  authView.hidden = true; appView.hidden = false; $("#dock").hidden = false;
-  loadFromLocal();   // 断开云端后回到本地数据
+  if (sb && sb.auth) sb.auth.signOut();
+  // onAuthStateChange 会自动回到登录页并清空数据
 };
 
 function renderAll() {
@@ -606,11 +617,14 @@ $("#csv-go").onclick = async () => {
 async function boot() {
   if (USE_CLOUD) {
     await loadSupabase();
-    if (!sb) { enterApp(); return; }   // 加载失败则降级为本地模式
-    // 混合模式：打开即用本地种子数据，提供「云端同步」入口（不强制登录）
-    $("#sync-btn").hidden = false;
-    enterApp();
-    // 若已有登录会话，自动续接并拉取云端数据
+    if (!sb) {
+      // Supabase 加载失败：降级本地模式，且默认空状态（不展示 SEED）
+      $("#auth-cancel").hidden = false;
+      enterApp();
+      return;
+    }
+    // 云端模式：必须登录才能看到数据，未登录只显示登录页
+    $("#auth-cancel").hidden = true;   // 强制登录，不展示「返回本地模式」
     try {
       const { data } = await sb.auth.getSession();
       if (data?.session?.user) {
@@ -618,22 +632,30 @@ async function boot() {
         $("#sync-btn").hidden = true;
         $("#logout-btn").hidden = false;
         $("#user-email").textContent = currentUser.email;
-        loadFromCloud();
+        enterApp();
+      } else {
+        showLogin();
       }
-    } catch (e) { console.warn("getSession 失败", e); }
+    } catch (e) {
+      console.warn("getSession 失败", e);
+      showLogin();
+    }
     sb.auth.onAuthStateChange((_e, session) => {
       if (session?.user) {
         currentUser = session.user;
-        authView.hidden = true; appView.hidden = false; $("#dock").hidden = false;
         $("#sync-btn").hidden = true;
         $("#logout-btn").hidden = false;
         $("#user-email").textContent = currentUser.email;
+        authView.hidden = true; appView.hidden = false; $("#dock").hidden = false;
         loadFromCloud();
+      } else {
+        // 退出或 session 失效：回到登录页并清空数据
+        showLogin();
       }
-      // session 为空（含退出）时保留当前视图，由按钮显式处理
     });
   } else {
-    // 本地模式：打开即进入仪表盘（内置种子数据），不依赖任何外部 CDN
+    // 本地模式：打开即进入仪表盘（默认空状态，不展示 SEED）
+    $("#auth-cancel").hidden = false;
     enterApp();
   }
 }
