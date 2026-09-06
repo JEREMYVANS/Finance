@@ -1,0 +1,7 @@
+# 本地迁移用数据，含真实财务明细，禁止提交到公开仓库
+seed.csv
+
+# 系统/编辑器文件
+.DS_Store
+*.log
+node_modules/
