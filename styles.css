@@ -89,11 +89,13 @@ h2.sec select{background:var(--panel2);color:var(--txt);border:1px solid var(--l
 .chart-legend{display:flex;align-items:center;gap:10px;margin-left:auto;font-size:12px;font-weight:500;color:var(--muted)}
 .chart-legend .dot{width:8px;height:8px;border-radius:2px;display:inline-block}
 .chart-legend .item{display:flex;align-items:center;gap:5px}
-/* 支出构成专用 2×2 图例 */
-.chart-legend.pie-legend{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;margin-left:0;align-content:center}
-.pie-legend .item{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;line-height:1.45;word-break:keep-all}
-.pie-legend .pct{font-weight:700;color:var(--txt);margin-left:4px}
-.pie-legend .delta{font-weight:700;margin-left:3px}
+/* 支出构成专用 2×2 图例：每项内部水平局中同一行 */
+.chart-legend.pie-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 16px;margin-left:0;align-content:center}
+.pie-legend .item{flex:0 0 calc(50% - 8px);display:flex;align-items:center;justify-content:center;gap:6px;font-size:11.5px;line-height:1;white-space:nowrap}
+.pie-legend .dot{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
+.pie-legend .label{color:var(--muted)}
+.pie-legend .pct{font-weight:700;color:var(--txt)}
+.pie-legend .delta{font-weight:700}
 .pie-legend .delta.up{color:var(--neg)}
 .pie-legend .delta.down{color:var(--balance)}
 .chart-box{position:relative;height:300px}
