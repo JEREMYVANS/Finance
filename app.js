@@ -62,6 +62,19 @@ function derive(r) {
   };
   return r;
 }
+
+/* 期数自愈：以最早月份为锚点，之后逐月 +1（消除因重复提交造成的偏移） */
+function recomputeTerms() {
+  if (!ROWS.length) return;
+  const sorted = [...ROWS].sort((a, b) => a.month.localeCompare(b.month));
+  const base = sorted[0];
+  const bCar = Number(base.car_term) || 0;
+  const bHouse = Number(base.house_term) || 0;
+  sorted.forEach((r, i) => {
+    r.car_term = Math.max(0, Math.min(60, bCar + i));
+    r.house_term = Math.max(0, Math.min(360, bHouse + i));
+  });
+}
 const PAY_ITEMS = [
   ["房贷", "house_loan"], ["车贷", "auto_loan"], ["电费", "electricity"],
   ["水费", "water"], ["气费", "gas"], ["充电", "charging"],
@@ -106,6 +119,7 @@ function loadFromLocal() {
   try { data = JSON.parse(localStorage.getItem(LOCAL_KEY)); } catch {}
   if (!Array.isArray(data) || !data.length) { data = SEED.slice(); localStorage.setItem(LOCAL_KEY, JSON.stringify(data)); }
   ROWS = data.map(derive);
+  recomputeTerms();   // 加载时自愈期数，纠正历史偏移
   initCurrentSavings(ROWS);
   renderAll();
 }
@@ -117,6 +131,7 @@ async function loadFromCloud() {
   if (error) { alert("读取失败：" + error.message); return; }
   if (data && data.length) {
     ROWS = data.map(derive);
+    recomputeTerms();   // 加载时自愈期数，纠正历史偏移
   } else if (ROWS.length) {
     // 云端无数据：首次把本地已有数据上传，保证多端一致
     const { error: upErr } = await sb.from("finance_records").upsert(
@@ -500,11 +515,6 @@ $("#add-form").onsubmit = async (e) => {
   const f = Object.fromEntries(new FormData(e.target).entries());
   const row = { month: f.month };
   FIELDS.filter(x => x !== "month").forEach(k => row[k] = Number(f[k]) || 0);
-  // 车贷/房贷期数自动累加
-  const maxCar = Math.max(0, ...ROWS.map(r => r.car_term));
-  const maxHouse = Math.max(0, ...ROWS.map(r => r.house_term));
-  row.car_term = Math.min(60, maxCar + 1);
-  row.house_term = Math.min(360, maxHouse + 1);
   const msg = $("#add-msg");
   // 同月份覆盖
   const existed = ROWS.find(r => r.month === row.month);
@@ -512,6 +522,7 @@ $("#add-form").onsubmit = async (e) => {
   ROWS = ROWS.filter(r => r.month !== row.month);
   ROWS.push(derive(row));
   ROWS.sort((a, b) => a.month.localeCompare(b.month));
+  recomputeTerms();   // 期数按月份顺序自愈，确保新增月份精确 +1
   // 应急储蓄金额随基金储蓄变动自动修正
   SAVINGS_CURRENT += (Number(row.saving_fund) || 0) - oldFund;
   localStorage.setItem(SAVE_CUR_KEY, SAVINGS_CURRENT);
@@ -547,6 +558,7 @@ $("#csv-go").onclick = async () => {
   const map = new Map(ROWS.map(r => [r.month, r]));
   incoming.forEach(r => map.set(r.month, r));
   ROWS = [...map.values()].sort((a, b) => a.month.localeCompare(b.month));
+  recomputeTerms();   // 期数按月份顺序自愈
   if (USE_CLOUD && currentUser) {
     const { error } = await sb.from("finance_records").upsert(
       incoming.map(r => ({ user_id: currentUser.id, ...strip(r) })), { onConflict: "user_id,month" });
