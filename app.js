@@ -144,40 +144,20 @@ async function loadFromCloud() {
   renderAll();
 }
 
-/* ---- 认证（仅 USE_CLOUD 时启用）---- */
-$$(".tab").forEach(t => t.onclick = () => {
-  mode = t.dataset.mode;
-  $$(".tab").forEach(x => x.classList.toggle("active", x === t));
-  $("#auth-btn").textContent = mode === "signin" ? "登录" : "注册";
-  $("#auth-msg").textContent = "";
-});
+/* ---- 认证：纯登录（注册已在 Supabase 后台关闭，避免陌生人占用免费额度）---- */
 $("#auth-btn").onclick = async () => {
   const email = $("#email").value.trim(), password = $("#password").value;
   const msg = $("#auth-msg"); msg.className = "msg";
   if (!email || password.length < 6) { msg.textContent = "请输入邮箱与至少 6 位密码"; msg.classList.add("err"); return; }
   msg.textContent = "处理中…";
   try {
-    let res, error;
-    if (mode === "signup") {
-      res = await sb.auth.signUp({ email, password });
-      error = res.error;
-      if (!error) {
-        // 即使 signUp 返回成功，通常也需要邮箱验证；切换到登录页并提示
-        msg.textContent = "注册成功，请先到邮箱完成验证，再回来登录。";
-        msg.classList.add("ok");
-        mode = "signin";
-        $$(".tab").forEach(x => x.classList.toggle("active", x.dataset.mode === "signin"));
-        $("#auth-btn").textContent = "登录";
-        return;
-      }
+    const res = await sb.auth.signInWithPassword({ email, password });
+    if (res.error) {
+      msg.textContent = (res.error.message || "登录失败，请重试");
+      msg.classList.add("err");
     } else {
-      res = await sb.auth.signInWithPassword({ email, password });
-      error = res.error;
-      if (!error) { msg.textContent = "登录成功"; msg.classList.add("ok"); return; }
+      msg.textContent = "登录成功"; msg.classList.add("ok");
     }
-    msg.textContent = (error.message || JSON.stringify(error)).includes("confirm")
-      ? "注册成功，请先到邮箱完成验证再登录。" : (error.message || "请求失败，请重试");
-    msg.classList.add("err");
   } catch (e) {
     msg.textContent = "网络或配置异常：" + (e?.message || e);
     msg.classList.add("err");
@@ -228,7 +208,6 @@ function updateUserMenu() {
 /* ===================================================================
    数据加载与渲染
    =================================================================== */
-$("#auth-cancel").onclick = () => { authView.hidden = true; appView.hidden = false; $("#dock").hidden = false; };
 
 /* 云端同步入口 / 退出登录 */
 $("#sync-btn").onclick = () => {
@@ -648,12 +627,10 @@ async function boot() {
     await loadSupabase();
     if (!sb) {
       // Supabase 加载失败：降级本地模式，且默认空状态（不展示 SEED）
-      $("#auth-cancel").hidden = false;
       enterApp();
       return;
     }
     // 云端模式：必须登录才能看到数据，未登录只显示登录页
-    $("#auth-cancel").hidden = true;   // 强制登录，不展示「返回本地模式」
     try {
       const { data } = await sb.auth.getSession();
       if (data?.session?.user) {
@@ -679,7 +656,6 @@ async function boot() {
     });
   } else {
     // 本地模式：打开即进入仪表盘（默认空状态，不展示 SEED）
-    $("#auth-cancel").hidden = false;
     enterApp();
   }
 }

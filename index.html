@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>财务仪表盘</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1" />
-  <link rel="stylesheet" href="styles.css?v=32" />
+  <link rel="stylesheet" href="styles.css?v=33" />
   <script src="chart.umd.min.js"></script>
 </head>
 <body>
@@ -13,15 +13,11 @@
   <div id="auth-view" class="auth-wrap" hidden>
     <div class="auth-card">
       <h1>财务仪表盘</h1>
-      <div class="tabs">
-        <button class="tab active" data-mode="signin">登录</button>
-        <button class="tab" data-mode="signup">注册</button>
-      </div>
       <input id="email" type="email" placeholder="邮箱" autocomplete="email" />
-      <input id="password" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password" />
+      <input id="password" type="password" placeholder="密码" autocomplete="current-password" />
       <button id="auth-btn" class="primary">登录</button>
-      <button id="auth-cancel" class="ghost" style="width:100%;margin-top:10px;">返回本地模式</button>
       <div id="auth-msg" class="msg"></div>
+      <div class="auth-footer">Copyright © 2026 Edward Chong</div>
     </div>
   </div>
 
@@ -158,7 +154,7 @@
       <!-- 页脚版权 -->
       <footer class="site-footer">
         <div>Copyright © 2026 Edward Chong</div>
-        <div class="ver">V1.09</div>
+        <div class="ver">V1.10</div>
       </footer>
     </main>
   </div>
@@ -246,6 +242,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=32"></script>
+  <script src="app.js?v=33"></script>
 </body>
 </html>
