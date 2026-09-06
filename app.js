@@ -188,7 +188,8 @@ $("#auth-btn").onclick = async () => {
 function enterApp() {
   authView.hidden = true; appView.hidden = false;
   $("#dock").hidden = false;
-  if (USE_CLOUD && currentUser) { $("#user-email").textContent = currentUser.email; loadFromCloud(); }
+  updateUserMenu();
+  if (USE_CLOUD && currentUser) loadFromCloud();
   else loadFromLocal();
 }
 
@@ -198,12 +199,30 @@ function showLogin() {
   ROWS = [];
   Object.values(charts).forEach(c => { if (c) try { c.destroy(); } catch {} });
   charts = {};
-  $("#user-email").textContent = "";
+  $("#user-menu").hidden = true;
+  $("#user-dropdown").hidden = true;
+  $("#ud-email").textContent = "";
+  $("#ud-latest").textContent = "–";
   $("#logout-btn").hidden = true;
   $("#sync-btn").hidden = false;
   authView.hidden = false;
   appView.hidden = true;
   $("#dock").hidden = true;
+}
+
+/* 更新用户菜单下拉内容 */
+function updateUserMenu() {
+  if (USE_CLOUD && currentUser) {
+    $("#user-menu").hidden = false;
+    $("#ud-email").textContent = currentUser.email;
+    $("#sync-btn").hidden = true;
+  } else {
+    $("#user-menu").hidden = true;
+    $("#user-dropdown").hidden = true;
+    $("#sync-btn").hidden = false;
+  }
+  const last = ROWS.length ? ROWS[ROWS.length - 1].month : "–";
+  $("#ud-latest").textContent = last;
 }
 
 /* ===================================================================
@@ -221,6 +240,15 @@ $("#logout-btn").onclick = () => {
   // onAuthStateChange 会自动回到登录页并清空数据
 };
 
+/* 用户菜单展开 / 收起 */
+$("#user-btn").onclick = (e) => {
+  e.stopPropagation();
+  const d = $("#user-dropdown");
+  d.hidden = !d.hidden;
+};
+$("#user-dropdown").onclick = (e) => e.stopPropagation();
+document.addEventListener("click", () => { $("#user-dropdown").hidden = true; });
+
 function renderAll() {
   if (!ROWS.length) {
     $("#empty").hidden = false;
@@ -231,6 +259,7 @@ function renderAll() {
   $("#empty").hidden = true;
   $("#dashboard").hidden = false;
   renderTopCards(); renderRepay(); renderChecklist(); renderSummary(); renderDetail(); renderCharts();
+  updateUserMenu();      // 同步最新录入时间到用户下拉
   forceLatest = false;   // 单次刷新只强制跳一次
 }
 
@@ -629,9 +658,6 @@ async function boot() {
       const { data } = await sb.auth.getSession();
       if (data?.session?.user) {
         currentUser = data.session.user;
-        $("#sync-btn").hidden = true;
-        $("#logout-btn").hidden = false;
-        $("#user-email").textContent = currentUser.email;
         enterApp();
       } else {
         showLogin();
@@ -643,10 +669,8 @@ async function boot() {
     sb.auth.onAuthStateChange((_e, session) => {
       if (session?.user) {
         currentUser = session.user;
-        $("#sync-btn").hidden = true;
-        $("#logout-btn").hidden = false;
-        $("#user-email").textContent = currentUser.email;
         authView.hidden = true; appView.hidden = false; $("#dock").hidden = false;
+        updateUserMenu();
         loadFromCloud();
       } else {
         // 退出或 session 失效：回到登录页并清空数据

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>财务仪表盘</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1" />
-  <link rel="stylesheet" href="styles.css?v=31" />
+  <link rel="stylesheet" href="styles.css?v=32" />
   <script src="chart.umd.min.js"></script>
 </head>
 <body>
@@ -18,7 +18,7 @@
         <button class="tab" data-mode="signup">注册</button>
       </div>
       <input id="email" type="email" placeholder="邮箱" autocomplete="email" />
-      <input id="password" type="password" placeholder="密码" autocomplete="current-password" />
+      <input id="password" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password" />
       <button id="auth-btn" class="primary">登录</button>
       <button id="auth-cancel" class="ghost" style="width:100%;margin-top:10px;">返回本地模式</button>
       <div id="auth-msg" class="msg"></div>
@@ -172,8 +172,19 @@
     <button id="add-btn" class="primary">+ 记录</button>
     <button id="import-btn" class="ghost">导入</button>
     <button id="sync-btn" class="ghost" hidden>云端同步</button>
-    <span id="user-email" class="user"></span>
-    <button id="logout-btn" class="ghost" hidden>退出</button>
+    <div class="user-menu" id="user-menu" hidden>
+      <button id="user-btn" class="ghost user-icon" title="账户">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <circle cx="12" cy="8" r="4"/>
+          <circle cx="12" cy="20" r="8" opacity=".35"/>
+        </svg>
+      </button>
+      <div class="user-dropdown" id="user-dropdown" hidden>
+        <div class="ud-email" id="ud-email"></div>
+        <div class="ud-meta">最新录入：<span id="ud-latest">–</span></div>
+        <button id="logout-btn" class="ghost ud-logout">退出</button>
+      </div>
+    </div>
   </div>
 
   <!-- ===================== 添加数据 弹窗 ===================== -->
@@ -235,6 +246,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=31"></script>
+  <script src="app.js?v=32"></script>
 </body>
 </html>
