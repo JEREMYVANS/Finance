@@ -68,9 +68,8 @@ h1{font-size:22px;margin-bottom:4px}
 .repay-extra .r-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:6px}
 .repay-extra .r-stat{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6}
 .pie-panel{display:flex;flex-direction:column}
-.pie-content{display:flex;align-items:center;gap:14px;flex:1;min-height:0}
-.pie-content .chart-box.pie-box{flex:1;height:100%;min-width:0}
-.sec-spacer{height:1px;background:var(--line);margin:18px 0 24px}
+.pie-content{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:center;height:170px}
+.pie-content .chart-box.pie-box{width:100%;height:170px}
 
 /* ---------- 区块标题 ---------- */
 h2.sec{font-size:16px;margin:24px 0 10px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
