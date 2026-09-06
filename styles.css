@@ -1,0 +1,190 @@
+/* ============================================================
+   财务仪表盘 · 暗黑风格（对齐 财务仪表盘.html）
+   背景深蓝灰，面板深灰，强调色沿用青蓝/红/绿
+   ============================================================ */
+:root{
+  --bg:#0f1419;
+  --panel:#1a2230;
+  --panel2:#222c3c;
+  --txt:#e6edf3;
+  --muted:#9fb0c3;
+  --line:#2b3748;
+
+  /* 图表 / 状态色（与原 HTML 一致） */
+  --salary:#4e79a7;
+  --total:#e15759;
+  --balance:#59a14f;
+  --cat1:#4e79a7;   /* 储蓄与赠与 */
+  --cat2:#e15759;   /* 债务偿还 */
+  --cat3:#f28e2b;   /* 用车开销 */
+  --cat4:#59a14f;   /* 居家开销 */
+  --pos:#59a14f;
+  --neg:#e15759;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+/* 让 hidden 属性真正生效，避免弹窗/视图被 display 覆盖 */
+[hidden]{display:none !important}
+html{min-height:100%}
+
+body{
+  font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+  background:var(--bg);color:var(--txt);padding:24px;line-height:1.5;
+  padding-bottom:96px;
+  -webkit-font-smoothing:antialiased;
+}
+h1{font-size:22px;margin-bottom:4px}
+.sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+
+/* ---------- 顶部双卡片（日常现金流 / 应急储蓄） ---------- */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+@media(max-width:860px){.cards{grid-template-columns:1fr}}
+.card-big{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.card-title{font-size:14px;font-weight:600;color:var(--txt);margin-bottom:14px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.metric-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+.metric-value{font-size:22px;font-weight:700}
+.card-foot{display:flex;gap:18px;font-size:12px;color:var(--muted)}
+.delta-up{color:var(--neg);font-weight:600}
+.delta-down{color:var(--pos);font-weight:600}
+.goal-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.goal-row button{font-size:11px;padding:4px 8px;border-radius:6px;background:var(--panel2);border:1px solid var(--line);color:var(--txt);cursor:pointer}
+.goal-row button:hover{background:rgba(255,255,255,0.08)}
+.goal-row input{width:90px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);background:var(--panel2);color:var(--txt);font-size:13px}
+.goal-edit{display:none;align-items:center;gap:6px}
+.goal-edit.show{display:flex}
+
+/* ---------- 还款进度 ---------- */
+.loans{margin-bottom:0}
+.loan{margin-bottom:18px}
+.loan:last-child{margin-bottom:0}
+.loan-head{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:8px}
+.bar{background:var(--panel2);border-radius:8px;height:26px;overflow:hidden}
+.bar-fill{height:100%;background:linear-gradient(90deg,var(--salary),var(--balance));border-radius:8px;transition:width .4s}
+.repay-panel{display:flex;flex-direction:column;justify-content:flex-start;padding:16px}
+.repay-extra{margin-top:10px}
+.repay-extra .r-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-bottom:6px}
+.repay-extra .r-stat{font-size:12px;color:var(--muted);margin-top:10px;line-height:1.6}
+.pie-panel{display:flex;flex-direction:column}
+.pie-content{display:flex;align-items:center;gap:14px;flex:1}
+.pie-content .chart-box.pie-box{flex:1;height:190px;min-width:0}
+.sec-spacer{height:1px;background:var(--line);margin:18px 0 24px}
+
+/* ---------- 区块标题 ---------- */
+h2.sec{font-size:16px;margin:24px 0 10px;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+h2.sec select{background:var(--panel2);color:var(--txt);border:1px solid var(--line);
+  border-radius:8px;padding:4px 8px;font-size:13px;font-family:inherit;cursor:pointer}
+.note{color:var(--muted);font-size:12px;margin-top:8px}
+
+/* ---------- 图表网格 ---------- */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;margin-top:28px;align-items:stretch}
+.grid.single{grid-template-columns:1fr}
+@media(max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+.panel h2{font-size:15px;margin-bottom:12px;font-weight:600;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.panel h2 select{margin-left:auto;background:var(--panel2);color:var(--txt);border:1px solid var(--line);
+  border-radius:8px;padding:4px 8px;font-size:13px;font-family:inherit;cursor:pointer}
+.chart-legend{display:flex;align-items:center;gap:10px;margin-left:auto;font-size:12px;font-weight:500;color:var(--muted)}
+.chart-legend .dot{width:8px;height:8px;border-radius:2px;display:inline-block}
+.chart-legend .item{display:flex;align-items:center;gap:5px}
+/* 支出构成专用 2×2 图例 */
+.chart-legend.pie-legend{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;margin-left:0;align-content:center}
+.pie-legend .item{white-space:nowrap}
+.chart-box{position:relative;height:300px}
+
+/* ---------- 表格 ---------- */
+table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+td.mon,th:first-child,td:first-child{text-align:left}
+tr.neg td:last-child{color:var(--neg);font-weight:700}
+.table-wrap{overflow:auto;max-height:420px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.scroll-x{overflow-x:auto}
+
+/* 已缴费清单 cell */
+#checklist th,#checklist td{text-align:center}
+.pay-cell.ok{color:var(--pos);font-weight:700;text-align:center;font-size:15px}
+.pay-cell.no{color:var(--muted);text-align:center;font-size:15px}
+
+/* 分类汇总 + 完整明细：列居中对齐，保证同列在一条直线上 */
+#summary th,#summary td,#detail th,#detail td{text-align:center;white-space:nowrap}
+#summary th:first-child,#summary td:first-child,#detail th:first-child,#detail td:first-child{text-align:center;min-width:70px}
+#summary th,#detail th{min-width:70px}
+
+/* ---------- 空数据提示 ---------- */
+.empty-tip{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:40px 28px;text-align:center;margin-bottom:22px}
+.empty-tip h3{font-size:20px;margin-bottom:8px}
+.empty-tip p{color:var(--muted);margin-bottom:18px}
+
+/* ============================================================
+   认证 / 弹窗 / Dock（暗黑风）
+   ============================================================ */
+button{font-family:inherit}
+.primary{background:linear-gradient(135deg,var(--salary),var(--balance));color:#fff;border:none;padding:13px 20px;
+  border-radius:16px;font-size:15px;font-weight:600;width:100%;cursor:pointer;transition:opacity .15s}
+.primary:hover{opacity:.92}
+.ghost{background:rgba(255,255,255,0.06);color:var(--txt);border:1px solid var(--line);padding:10px 16px;
+  border-radius:14px;font-size:13px;cursor:pointer}
+.ghost:hover{background:rgba(255,255,255,0.12)}
+.x{background:none;border:none;font-size:24px;line-height:1;color:var(--muted);cursor:pointer}
+
+/* 登录 / 注册 */
+.auth-wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
+.auth-card{width:100%;max-width:380px;background:var(--panel);border:1px solid var(--line);border-radius:20px;
+  padding:40px 32px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.auth-card h1{font-size:26px;font-weight:700;margin-bottom:8px}
+.auth-card .muted{margin-bottom:28px;font-size:14px}
+.tabs{display:flex;gap:10px;margin-bottom:18px}
+.tab{flex:1;padding:11px 0;border:1px solid var(--line);background:rgba(255,255,255,0.05);border-radius:14px;
+  cursor:pointer;color:var(--muted);font-size:14px;font-weight:500;transition:all .15s}
+.tab.active{background:linear-gradient(135deg,var(--salary),var(--balance));color:#fff;border-color:transparent}
+.auth-card input{width:100%;padding:13px 15px;margin-bottom:13px;border:1px solid var(--line);border-radius:14px;
+  font-size:15px;outline:none;background:var(--panel2);color:var(--txt)}
+.auth-card input:focus{border-color:var(--salary)}
+
+/* 弹窗 */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:grid;place-items:center;padding:20px;z-index:80;backdrop-filter:blur(6px)}
+.modal-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  width:100%;max-width:520px;padding:26px}
+.modal-card.adjust-card{max-width:360px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.modal-head h3{font-size:18px;font-weight:700}
+.adjust-card input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);
+  color:var(--txt);font-size:15px;outline:none;margin-bottom:8px}
+.adjust-card input:focus{border-color:var(--salary)}
+.adjust-card .form-actions{margin-top:6px}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 16px;margin-top:12px}
+.form-grid label{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:5px;font-weight:600}
+.form-grid input{padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;color:var(--txt);
+  outline:none;background:var(--panel2)}
+.form-grid input:focus{border-color:var(--salary)}
+.form-actions{grid-column:1/-1;display:flex;justify-content:flex-end;gap:12px;margin-top:10px}
+.form-actions .primary{width:auto;padding:11px 22px}
+.form-actions .ghost{border-radius:14px;padding:11px 22px}
+
+.form-grid label .label-text{display:flex;align-items:center;gap:6px}
+.adjust-tag{font-size:11px;color:var(--salary);text-decoration:underline;cursor:pointer;font-weight:500}
+.adjust-tag:hover{color:var(--balance)}
+
+.msg{font-size:13.5px;margin-top:12px;min-height:18px;font-weight:500}
+.msg.err{color:var(--neg)}
+.msg.ok{color:var(--pos)}
+
+/* 底部 Dock */
+.dock{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:10px;
+  padding:10px 14px;background:rgba(26,34,48,0.85);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border:1px solid var(--line);border-radius:999px;box-shadow:0 20px 60px rgba(0,0,0,0.45);z-index:60}
+.dock-title{display:flex;flex-direction:column;margin-right:8px;padding-right:10px;border-right:1px solid var(--line)}
+.dock-title .d-title{font-size:14px;font-weight:700;color:var(--txt);line-height:1.2}
+.dock-title .d-sub{font-size:11px;color:var(--muted);line-height:1.2;margin-top:2px}
+.dock button{flex-shrink:0}
+.dock .primary{width:auto;padding:11px 18px;border-radius:999px}
+.dock .ghost{border-radius:999px}
+.dock .user{font-size:12.5px;color:var(--muted);margin:0 6px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* 页脚版权 */
+.site-footer{text-align:center;color:var(--muted);opacity:.6;font-size:12px;line-height:1.7;
+  padding:28px 0 92px;margin-top:20px}
+.site-footer .ver{font-size:11px;opacity:.85}

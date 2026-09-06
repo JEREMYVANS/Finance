@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>财务仪表盘</title>
+  <link rel="stylesheet" href="styles.css?v=23" />
+  <script src="chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- ===================== 登录 / 注册 ===================== -->
+  <div id="auth-view" class="auth-wrap" hidden>
+    <div class="auth-card">
+      <h1>云端同步</h1>
+      <p class="muted">登录后数据上云、多端可用（也可仅用本地模式）。</p>
+      <div class="tabs">
+        <button class="tab active" data-mode="signin">登录</button>
+        <button class="tab" data-mode="signup">注册</button>
+      </div>
+      <input id="email" type="email" placeholder="邮箱" autocomplete="email" />
+      <input id="password" type="password" placeholder="密码（至少 6 位）" autocomplete="current-password" />
+      <button id="auth-btn" class="primary">登录</button>
+      <button id="auth-cancel" class="ghost" style="width:100%;margin-top:10px;">返回本地模式</button>
+      <div id="auth-msg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- ===================== 仪表盘 ===================== -->
+  <div id="app-view" class="app" hidden>
+
+    <div id="empty" class="empty-tip" hidden>
+      <h3>暂无数据</h3>
+      <p>点击下方「+ 记录」录入第一个月，或「导入」迁移历史记录。</p>
+      <button id="empty-add" class="primary" style="width:auto;padding:12px 24px;">+ 记录</button>
+    </div>
+
+    <main id="dashboard">
+      <!-- 顶部双卡片：日常现金流 / 应急储蓄 -->
+      <section class="cards" id="kpi-cards">
+        <div class="card-big">
+          <div class="card-title">日常现金流</div>
+          <div class="metrics">
+            <div>
+              <div class="metric-label">本月收入</div>
+              <div class="metric-value" id="flow-income" style="color:var(--salary)">–</div>
+            </div>
+            <div>
+              <div class="metric-label">已支出</div>
+              <div class="metric-value" id="flow-spent" style="color:var(--total)">–</div>
+            </div>
+            <div>
+              <div class="metric-label">剩余可用</div>
+              <div class="metric-value" id="flow-remain" style="color:var(--balance)">–</div>
+            </div>
+          </div>
+          <div class="card-foot">
+            <span>较上月支出：<span id="flow-spent-delta">–</span></span>
+            <span>较上月剩余：<span id="flow-remain-delta">–</span></span>
+          </div>
+        </div>
+
+        <div class="card-big">
+          <div class="card-title">应急储蓄</div>
+          <div class="metrics">
+            <div>
+              <div class="metric-label">当前金额</div>
+              <div class="metric-value goal-row">
+                <span id="save-current" style="color:var(--salary)">–</span>
+                <button id="save-edit-btn" type="button">调整</button>
+                <span class="goal-edit" id="save-edit-box">
+                  <input id="save-input" type="number" placeholder="当前金额" />
+                  <button id="save-save-btn" type="button">保存</button>
+                </span>
+              </div>
+            </div>
+            <div>
+              <div class="metric-label">动态目标</div>
+              <div class="metric-value goal-row">
+                <span id="save-goal">–</span>
+                <button id="goal-edit-btn" type="button">调整</button>
+                <span class="goal-edit" id="goal-edit-box">
+                  <input id="goal-input" type="number" placeholder="目标金额" />
+                  <button id="goal-save-btn" type="button">保存</button>
+                </span>
+              </div>
+            </div>
+            <div>
+              <div class="metric-label">本月新增</div>
+              <div class="metric-value" id="save-added" style="color:var(--balance)">–</div>
+            </div>
+          </div>
+          <div class="card-foot">
+            <span>较上月：<span id="save-added-delta">–</span></span>
+            <span>进度：<span id="save-progress">–</span></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 还款进度 + 支出构成 -->
+      <div class="grid">
+        <div class="panel repay-panel">
+          <h2>还款进度</h2>
+          <div class="loans" id="repay">
+            <div class="loan">
+              <div class="loan-head"><span>车贷还款进度</span><span id="car-pct"></span></div>
+              <div class="bar"><div class="bar-fill" id="car-fill"></div></div>
+            </div>
+            <div class="loan">
+              <div class="loan-head"><span>房贷还款进度</span><span id="house-pct"></span></div>
+              <div class="bar"><div class="bar-fill" id="house-fill"></div></div>
+            </div>
+          </div>
+          <div class="repay-extra" id="repay-extra"></div>
+        </div>
+        <div class="panel pie-panel">
+          <h2>支出构成
+            <select id="pie-month"></select>
+          </h2>
+          <div class="pie-content">
+            <div class="chart-box pie-box"><canvas id="pie"></canvas></div>
+            <div class="chart-legend pie-legend" id="pie-legend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 当月已缴费清单 -->
+      <h2 class="sec">当月已缴费清单
+        <select id="checklist-month"></select>
+      </h2>
+      <div class="table-wrap scroll-x">
+        <table id="checklist"><thead></thead><tbody></tbody></table>
+      </div>
+
+      <!-- 近6个月现金流对比 + 近6个月生活杂费趋势 -->
+      <div class="grid">
+        <div class="panel">
+          <h2>近6个月现金流对比
+            <span class="chart-legend" id="trend-legend"></span>
+          </h2>
+          <div class="chart-box"><canvas id="trend"></canvas></div>
+        </div>
+        <div class="panel">
+          <h2>近6个月生活杂费趋势
+            <span class="chart-legend" id="util-legend"></span>
+          </h2>
+          <div class="chart-box"><canvas id="util"></canvas></div>
+        </div>
+      </div>
+
+      <!-- 分类汇总 -->
+      <h2 class="sec">分类汇总</h2>
+      <div class="table-wrap"><table id="summary"><thead></thead><tbody></tbody></table></div>
+
+      <!-- 完整明细 -->
+      <h2 class="sec">完整明细</h2>
+      <div class="table-wrap scroll-x"><table id="detail"><thead></thead><tbody></tbody></table></div>
+
+      <!-- 页脚版权 -->
+      <footer class="site-footer">
+        <div>Copyright © 2026 Edward Chong</div>
+        <div class="ver">V1.0</div>
+      </footer>
+    </main>
+  </div>
+
+  <!-- ===================== 底部 Dock ===================== -->
+  <div id="dock" class="dock" hidden>
+    <div class="dock-title">
+      <span class="d-title">财务仪表盘</span>
+      <span class="d-sub" id="dock-sub">数据加载中…</span>
+    </div>
+    <button id="add-btn" class="primary">+ 记录</button>
+    <button id="import-btn" class="ghost">导入</button>
+    <button id="sync-btn" class="ghost" hidden>云端同步</button>
+    <span id="user-email" class="user"></span>
+    <button id="logout-btn" class="ghost" hidden>退出</button>
+  </div>
+
+  <!-- ===================== 添加数据 弹窗 ===================== -->
+  <div id="modal-add" class="modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head"><h3>记录新数据</h3><button class="x" data-close>×</button></div>
+      <form id="add-form" class="form-grid">
+        <label>月份 (YYYY-MM)<input name="month" placeholder="2026-08" required /></label>
+        <label>工资<input name="salary" type="number" step="0.01" required /></label>
+        <label>上月结余<input name="prev_balance" type="number" step="0.01" /></label>
+        <label class="adjust-label"><span class="label-text">基金储蓄 <span id="adjust-saving_fund" class="adjust-tag">调整</span></span>
+          <input name="saving_fund" type="number" step="0.01" value="1000" />
+        </label>
+        <label>给妈妈<input name="giving_mom" type="number" step="0.01" value="1000" /></label>
+        <label>车贷<input name="auto_loan" type="number" step="0.01" value="1725" /></label>
+        <label>充电<input name="charging" type="number" step="0.01" /></label>
+        <label>停车<input name="parking" type="number" step="0.01" /></label>
+        <label class="adjust-label"><span class="label-text">房贷 <span id="adjust-house" class="adjust-tag">调整</span></span>
+          <input name="house_loan" type="number" step="0.01" value="3164.48" />
+        </label>
+        <label>物业费<input name="property_fee" type="number" step="0.01" value="256.61" /></label>
+        <label>车辆管理费<input name="vehicle_fee" type="number" step="0.01" value="85.5" /></label>
+        <label>水费<input name="water" type="number" step="0.01" /></label>
+        <label>电费<input name="electricity" type="number" step="0.01" /></label>
+        <label>气费<input name="gas" type="number" step="0.01" /></label>
+        <div class="form-actions">
+          <button type="button" class="ghost" data-close>取消</button>
+          <button type="submit" class="primary">保存</button>
+        </div>
+      </form>
+      <div id="add-msg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- ===================== 导入 CSV 弹窗 ===================== -->
+  <div id="modal-import" class="modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head"><h3>从 CSV 导入</h3><button class="x" data-close>×</button></div>
+      <p class="muted small">选择 <code>seed.csv</code> 或同结构文件（含表头：month,salary,...）。仅导入当前登录用户的数据。</p>
+      <input id="csv-file" type="file" accept=".csv" />
+      <div class="form-actions">
+        <button class="ghost" data-close>取消</button>
+        <button id="csv-go" class="primary">导入</button>
+      </div>
+      <div id="import-msg" class="msg"></div>
+    </div>
+  </div>
+
+  <!-- ===================== 调整默认值 弹窗 ===================== -->
+  <div id="modal-adjust" class="modal" hidden>
+    <div class="modal-card adjust-card">
+      <div class="modal-head"><h3 id="adjust-title">设置默认值</h3><button class="x" data-close>×</button></div>
+      <input id="adjust-input" type="number" step="0.01" placeholder="请输入金额" />
+      <div class="form-actions">
+        <button type="button" class="ghost" data-close>取消</button>
+        <button id="adjust-save" type="button" class="primary">保存</button>
+      </div>
+      <div id="adjust-msg" class="msg"></div>
+    </div>
+  </div>
+
+  <script src="app.js?v=23"></script>
+</body>
+</html>
